@@ -6,7 +6,6 @@ def main():
     config_path = f"/home/{username}/code/.config"
     config = load_config(config_path)
     if check_api(config):
-        print("\033[1m\033[91mAPI key is not set.\033[0m")
         set_api_key(config, config_path)
         sys.exit(1)
     api_key = config["api_key"]

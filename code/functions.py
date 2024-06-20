@@ -16,7 +16,10 @@ def check_api(config):
 
 
 def set_api_key(config, config_path):
-    api_key = input("Enter your OpenAI API key: ")
+    console = Console()
+    console.print("API key is not set." , style="bold red")
+    console.print("Go to [link https://mdb.ai/llm-serve]MindsDB, get you API Key and enter it: ", style="green",end="")
+    api_key = input()
     config["api_key"] = api_key
     with open(config_path, "w") as file:
         json.dump(config, file, indent=4)
