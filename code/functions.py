@@ -66,13 +66,6 @@ def open_vim_and_get_input(filename="input.txt"):
         data = file.read()
     os.remove(filename)
     return data
-
-
-def check_input_commands(user_input, response):
-    if "<paste>" in user_input:
-        user_input = re.sun("<paste>", pyperclip.paste(), user_input)
-    if "<copy>" in user_input:
-        pyperclip.copy(response)
     
 
 def print_panel(console, content, color, border_color, title):
