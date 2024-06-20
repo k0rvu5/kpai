@@ -3,7 +3,10 @@ from functions import *
 def main():
 
     username = os.getlogin()
-    config_path = f"/home/{username}/code/.config"
+    if check_os() == "windows":
+        config_path = f"C:/Users/{username}/kpai_config"
+    elif check_os() == "linux":
+        config_path = f"/home/{username}/.kpai_config"
     config = load_config(config_path)
     if check_api(config):
         set_api_key(config, config_path)

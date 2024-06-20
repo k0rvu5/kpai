@@ -10,6 +10,17 @@ from rich.text import Text
 from rich.align import Align
 import pyperclip
 
+
+def check_os():
+    if sys.platform == "win32":
+        return "windows"
+    elif sys.platform == "darwin":
+        return "macos"
+    elif sys.platform == "linux":
+        return "linux"
+    else:
+        return "unknown"
+
 def check_api(config):
     if config["api_key"] == "":
         return True
@@ -134,7 +145,9 @@ def interactive_mode(console, api_key, llm, config):
 
 
 def handle_cli_args(args, config, config_path):
-    if args[1] == "list":
+    if args[1] == "help":
+        print("""kpai help:""")
+    elif args[1] == "list":
         print("""claude-3-haiku
 codellama-70b
 dbrx
@@ -147,16 +160,15 @@ mistral-7b
 mixtral-8x7b
 gemini-1.5-pro
 text-embedding-ada-002""")
-    elif args[1] == "config":
-        if args[2] == "show":
-            print(json.dumps(config, indent=4))
-        elif args[2] == "change":
-            if args[3] not in config.keys():
-                print(f"{args[3]} is not a valid key")
-                sys.exit(1)
-            config[args[3]] = " ".join(args[4:])
-            with open(config_path, "w") as file:
-                json.dump(config, file, indent=4)
+    elif args[1] == "show":
+        print(json.dumps(config, indent=4))
+    elif args[1] == "set":
+        if args[2] not in config.keys():
+            print(f"{args[2]} is not a valid key")
+            sys.exit(1)
+        config[args[2]] = " ".join(args[3:])
+        with open(config_path, "w") as file:
+            json.dump(config, file, indent=4)
 
 
 # def main():
