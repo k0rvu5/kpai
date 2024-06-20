@@ -58,7 +58,7 @@ def create_default_config(config_path):
         json.dump(default_config, file, indent=4)
 
 
-def ai_generate(api_key, llm, prompt):
+def ai_generate(api_key, llm, prompt, config):
     client = OpenAI(
         api_key=api_key,
         base_url="https://llm.mdb.ai/"
@@ -68,7 +68,10 @@ def ai_generate(api_key, llm, prompt):
         messages=prompt,
         stream=False
     )
-    return completion.choices[0].message.content[:-1]
+    if config["llm"] == "gemini-1.5-pro":
+        return completion.choices[0].message.content[:-1]
+    else:
+        return completion.choices[0].message.content
 
 
 def open_vim_and_get_input(filename="input.txt"):
