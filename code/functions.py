@@ -124,6 +124,9 @@ def interactive_mode(console, api_key, llm, config):
         user_input = input("\033[1m\033[94mYou: \033[0m ")
         if "<p>" in user_input:
             user_input = re.sub("<p>", pyperclip.paste(), user_input)
+        if "<c>" in user_input:
+            user_input = re.sub("<c>", "", user_input)
+            copy_response = True
         print("\033[F", end="")
         print("\033[k", end="")
 
@@ -139,7 +142,7 @@ def interactive_mode(console, api_key, llm, config):
 
         response = ai_generate(api_key, llm, messages, config)
         messages.append({"role": "assistant", "content": response})
-        if "<c>" in user_input:
+        if copy_response:
             pyperclip.copy(response)
 
         text_obj = parse_ai_response(user_input, response, config["ai_answer_color"])
