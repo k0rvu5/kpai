@@ -127,7 +127,7 @@ def interactive_mode(console, api_key, llm, config):
         print("\033[F", end="")
         print("\033[k", end="")
 
-        if user_input.lower() == "exit":
+        if user_input.lower() == "exit" or user_input.lower() == "q":
             break
 
         if user_input.lower() == "vim":
@@ -137,7 +137,7 @@ def interactive_mode(console, api_key, llm, config):
 
         print_panel(console, user_input, config["user_message_color"], config["user_message_border_color"], "You")
 
-        response = ai_generate(api_key, llm, messages)
+        response = ai_generate(api_key, llm, messages, config)
         messages.append({"role": "assistant", "content": response})
         if "<c>" in user_input:
             pyperclip.copy(response)
