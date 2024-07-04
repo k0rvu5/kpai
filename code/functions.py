@@ -105,7 +105,7 @@ def parse_ai_response(user_input, response, ai_answer_color):
             if re.search(r"^[\sa-z]", part):
                 x = re.search(r"^(\w*\s)", part).end()
                 text_obj.append(part[x:-1], style="magenta")
-                if "<copy_code_blocks>" in user_input:
+                if "<cb>" in user_input:
                     pyperclip.copy(part[x:-1])
         else:
             text_obj.append(part, style=ai_answer_color)
@@ -121,12 +121,16 @@ def interactive_mode(console, api_key, llm, config):
         },
     ]
     while True:
+        copy_response = False
         user_input = input("\033[1m\033[94mYou: \033[0m ")
         if "<p>" in user_input:
             user_input = re.sub("<p>", pyperclip.paste(), user_input)
         if "<c>" in user_input:
-            user_input = re.sub("<c>", "", user_input)
+            user_input = re.sub("\s*<c>\s*", "", user_input)
             copy_response = True
+        if "<cb>" in user_input:
+            user_input = re.sub(r"\s*<cb>\s*", "", user_input)
+            
         print("\033[F", end="")
         print("\033[k", end="")
 
