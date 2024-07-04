@@ -1,4 +1,4 @@
-from functions import *
+from poor import *
 
 def main():
 
@@ -14,10 +14,8 @@ def main():
     api_key = config["api_key"]
     llm = config["llm"]
 
-    console = Console()
-
     if len(sys.argv) == 1:
-        interactive_mode(console, api_key, llm, config)
+        interactive_mode(api_key, llm, config)
     else:
         handle_cli_args(sys.argv, config, config_path)
 
