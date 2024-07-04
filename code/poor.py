@@ -94,46 +94,17 @@ def open_vim_and_get_input(filename="input.txt"):
     return data
     
 
-# def print_panel(console, content, color, border_color, title):
-#     panel = Align.center(
-#         Panel(
-#             Text(content, style=color),
-#             border_style=border_color,
-#             title=title,
-#         ),
-#         vertical="middle",
-#     )
-#     console.print(panel)
-
-
-# def parse_ai_response(user_input, response, ai_answer_color):
-#     # response = re.sub(r'\*\*(.*?)\*\*', r'\033[1m\1\033[0m', response)
-#     response = "\n" + response
-#     response_parts = response.split("```")
-
-#     text_obj = Text()
-#     for part in response_parts:
-#         if not part.startswith("\n"):
-#             if re.search(r"^[\sa-z]", part):
-#                 x = re.search(r"^(\w*\s)", part).end()
-#                 text_obj.append(part[x:-1], style="magenta")
-#                 if "<cb>" in user_input:
-#                     pyperclip.copy(part[x:-1])
-#         else:
-#             text_obj.append(part, style=ai_answer_color)
-
-#     return text_obj
-
 def parse_ai_response(text, user_input):
     pattern = r"```\w+(.*?)```"
     replacement = r"\033[95m\g<1>\033[0m"
     text = re.sub(pattern, replacement, text, flags=re.DOTALL)
     pattern = r"\*\*(.*?)\*\*"
-    replacement = r"\033[1m\g<1>\033[0m"
+    replacement = r"\033[36m\g<1>\033[0m"
     text = re.sub(pattern, replacement, text, flags=re.DOTALL)
     pattern = r"`(.*?)`"
     replacement = r"\033[92m\g<1>\033[0m"
     text = re.sub(pattern, replacement, text, flags=re.DOTALL)
+    text = text.replace("*", "%s*%s" % (colors["boldmagenta"], colors["default"]))
 
     # if "<p>" in user_input.lower():
     #     clipboard = pyperclip.paste()
@@ -151,17 +122,25 @@ def interactive_mode(api_key, llm, config):
     ]
     while True:
         copy_response = False
-        user_input = input("%sYou: %s" % (colors["boldcyan"], colors["default"]))
+        user_input = input("%sYou: %s" % (colors["boldyellow"], colors["default"]))
         if "<p>" in user_input:
             user_input = re.sub("<p>", pyperclip.paste(), user_input)
         if "<c>" in user_input:
-            user_input = re.sub("\s*<c>\s*", "", user_input)
+            user_input = re.sub("<c>", "", user_input)
             copy_response = True
         if "<cb>" in user_input:
             user_input = re.sub(r"\s*<cb>\s*", "", user_input)
             
 
         if user_input.lower() == "exit" or user_input.lower() == "q":
+            break
+        
+        if user_input.lower() == "save":
+            save_chat_name = input("Enter a name for this chat: ")
+            messages.insert(0, config["llm"])
+            with open("%s.json" % save_chat_name, "w") as file:
+                json.dump(messages, file, indent=4)
+            print("%sFile saved successfuly!" % colors["green"])
             break
 
         if user_input.lower() == "vim":
@@ -178,8 +157,14 @@ def interactive_mode(api_key, llm, config):
             pyperclip.copy(response)
 
         text_obj = parse_ai_response(response, user_input)
-
-        print("%sAssistant: %s%s" % (colors["boldred"], colors["default"],text_obj))
+        if config["llm"] == "gpt-3.5-turbo":
+            print("%sGPT: %s%s" % (colors["boldred"], colors["default"],text_obj))
+        elif config["llm"] == "claude-3-haiku":
+            print("%sClaude: %s%s" % (colors["boldred"], colors["default"],text_obj))
+        elif config["llm"] == "gemini-1.5-pro":
+            print("%sGemini: %s%s" % (colors["boldred"], colors["default"],text_obj))
+        elif config["llm"] == "llama-3-70b":
+            print("%sLlama: %s%s" % (colors["boldred"], colors["default"],text_obj))
 
 def handle_cli_args(args, config, config_path):
     if args[1] == "help":
@@ -199,6 +184,20 @@ gemini-1.5-pro
 text-embedding-ada-002""")
     elif args[1] == "show":
         print(json.dumps(config, indent=4))
+    elif args[1] == "read":
+        jsonname = args[2]
+        with open(jsonname, "r") as file:
+            messages_list = json.load(file)
+            print("%sLLM%s: %s" % (colors["boldgreen"], colors["default"], messages_list[0]))
+            messages_list = messages_list[1:]
+            for i in messages_list:
+                if i["role"] == "system":
+                    print("%s%s%s: %s" % (colors["boldcyan"], i["role"], colors["default"], i["content"]))
+                elif i["role"] == "user":
+                    print("%s%s%s: %s" % (colors["boldyellow"], i["role"], colors["default"], i["content"]))
+                elif i["role"] == "assistant":
+                    print("%s%s%s: %s" % (colors["boldred"], i["role"], colors["default"], i["content"]))
+
     elif args[1] == "set":
         if args[2] not in config.keys():
             print(f"{args[2]} is not a valid key")
